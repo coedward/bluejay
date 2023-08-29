@@ -62,7 +62,8 @@ with col1:
         # create a string of word tags (parts of word) from word tokens
         # The word tokens keys are extracted from Madi to English dictionary
         word_tags = ""
-        # The loop iterates through the dictionary to extract the English words
+        # The loop iterates through the dictionary to extract the English word tags
+        # And create tokens of the word tags
         for m in range(len(words_tokens)):
             if words_tokens[m] in madi_eng_dict2:
                 word_tags = word_tags + " " + madi_eng_dict2[words_tokens[m]]

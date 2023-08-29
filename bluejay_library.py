@@ -1,32 +1,41 @@
-#Developed  by Caesar Oniku Edward
+# Developed  by Caesar Oniku Edward
 # importing required libraries
 import nltk
 from nltk.tokenize import word_tokenize
+from gtts import gTTS
+import pyttsx3
+import os
 import csv
-#nltk.download('averaged_perceptron_tagger')
+
+# nltk.download('averaged_perceptron_tagger')
 # import language_tool_python
 # tool = language_tool_python.LanguageTool('en-US')  # use a local server
 # tool = language_tool_python.LanguageToolPublicAPI('en-US') # or use public API
 # creating a  Madi-English dictionary with zero content
 madi_eng_dict = {}
 madi_eng_dict2 = {}
-
-with open('MadiEnglishDict.csv', mode='r') as g:
-    reader = csv.reader(g)
-    madi_eng_dict2 = {rows[1]: rows[2] for rows in reader}
-    g.close()
+dinka_madi_dict = {}
 
 def tokenize_text(text):
     tokens = word_tokenize(text)
     return tokens
 
+def untokenize(tokens):
+    text_from_tokens = ''
+    for i in range(len(tokens)):
+        text_from_tokens = text_from_tokens + tokens[i]
+    return text_from_tokens
+
+# Creates a Python dictionary from the csv file
 def csv_to_dictionary(csv_file):
     with open(csv_file, mode='r') as f:
-        reader = csv.reader(f)
-        madi_eng_dict = {rows[0]: rows[1] for rows in reader}
+        created_dictionary = csv.reader(f)
+        bilingual_dict = {rows[0]: rows[1] for rows in created_dictionary}
         f.close()
-    return madi_eng_dict
+    return bilingual_dict
 
+# Given a source text and a bilingual dictionary, it creates tokens from the source text and translate them
+# into another language using the bilngual dictionary
 def translate_tokens(source_text, input_csv_file):
     tokens_from_text = tokenize_text(source_text)
     source_dictionary = csv_to_dictionary(input_csv_file)
@@ -40,39 +49,34 @@ def translate_tokens(source_text, input_csv_file):
                 continue
     return translated_tokens
 
-class BilingualDictionary:
-    madi_eng_dict = {}
-    madi_eng_dict2 = {}
+def get_token_tags(translated_tokens):
+    streams_of_tags = " "
+    for m in range(len(translated_tokens)):
+        if translated_tokens[m] in madi_eng_dict2:
+            streams_of_tags = streams_of_tags + " " + madi_eng_dict2[translated_tokens[m]]
+        else:
+            continue
+    token_tags = word_tokenize(streams_of_tags)
+    return token_tags
 
-    def __init__(self, csv_file):
-        self.csv_file = csv_file
+def get_word_tags(input_text):
+    word_tags = nltk.pos_tag(word_tokenize(input_text))
+    return word_tags
 
-    # creates dictionary from csv file
-    def create(self) -> object:
-        with open(self.csv_file, mode='r') as f:
-            reader = csv.reader(f)
-            madi_eng_dict: dict = {rows[0]: rows[1] for rows in reader}
-            f.close()
-        return madi_eng_dict
+def text_to_speech(input_sentence):
+    sentence = input_sentence
+    file = "file.mp3"
+    tts = gTTS(sentence, 'en')
+    tts.save(file)
+    os.system("mpg123" + file)
+    return
 
-    # gets keyword from the dictionary
-    def get_keywords(self) -> object:
-        bidict = BilingualDictionary
-        my_dict = bidict.create(self)
-        key_words_tokens = word_tokenize(self)
-        for i in range(len(key_words_tokens)):
-            if key_words_tokens[i] in my_dict:
-                sentence = sentence + " " + my_dict[key_words_tokens[i]]
-            else:
-                sentence = sentence + " " + key_words_tokens[i]
-        words_tokens = word_tokenize(sentence)
-        return words_tokens
-
-class madi_eng_dict_tagged (dict):
-    # __init__ function
-    def __init__(self):
-        self = dict()
-        # Function to add key:value
-
-    def add(self, key, value):
-        self[key] = value
+def text_to_speech_pyttsx3(input_text, rate):
+    engine = pyttsx3.init()
+    # convert this text to speech
+    text = input_text
+    # setting the voice rate (faster or slower)
+    engine.setProperty("rate", rate)
+    engine.say(text)
+    engine.runAndWait()
+    return
